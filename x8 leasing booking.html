@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X8 PRODUCTION | MULTI-MONTH BOOKING SYSTEM</title>
+    
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
+    <meta name="pragma" content="no-cache">
+
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #111111;
+            --muted-text: #666666;
+            --border-color: #e5e5e5;
+            --highlight: #2b8a3e;
+            --admin-color: #4c6ef5;
+            --booked-bg: #e6f4ea;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background-color: var(--bg-color); color: var(--text-color); line-height: 1.5; padding: 0 2rem; }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* HEADER */
+        header { padding: 2rem 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .logo h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
+        .client-tag { font-size: 0.85rem; font-weight: 600; color: var(--muted-text); background-color: #f8f9fa; border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 4px; }
+        .admin-badge { background-color: #edf2ff; color: var(--admin-color); border: 1px solid #bac8ff; }
+
+        /* HERO */
+        .hero { padding: 3rem 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: flex-end; }
+        .hero h2 { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
+        .hero p { color: var(--muted-text); font-size: 1rem; }
+        .logout-btn { font-size: 0.8rem; color: #fa5252; background: none; border: none; cursor: pointer; text-decoration: underline; }
+
+        /* LAYOUT */
+        .grid-layout { display: grid; grid-template-columns: 1fr; gap: 4rem; padding: 3rem 0; }
+        @media (min-width: 992px) { .grid-layout { grid-template-columns: 400px 1fr; } }
+
+        /* LEFT: CALENDAR */
+        .section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted-text); margin-bottom: 1.5rem; }
+        .calendar-wrap { position: sticky; top: 2rem; }
+        
+        .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .month-indicator { font-size: 1.4rem; font-weight: 700; }
+        .nav-btn { background: none; border: 1px solid var(--border-color); padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+        .nav-btn:hover { background: #f8f9fa; }
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; background-color: #fdfdfd; margin-bottom: 1.5rem; }
+        .weekday { font-size: 0.75rem; font-weight: 700; color: var(--muted-text); padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        .day { font-size: 0.9rem; font-weight: 600; color: #ccc; padding: 0.8rem 0; border-radius: 4px; min-height: 65px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; border: 1px solid transparent; }
+        .day.active-month { color: var(--text-color); border: 1px solid #f1f3f5; }
+        .day .day-num { font-size: 0.95rem; margin-bottom: 2px; }
+        
+        .day .venue-tag { font-size: 0.65rem; color: var(--highlight); background: #ffffff; padding: 1px 3px; border-radius: 2px; border: 1px solid #a3cfbb; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; text-align: center; font-weight: 500; margin-top: auto; }
+        .day.booked { background-color: var(--booked-bg); color: var(--highlight); border: 1px solid #a3cfbb; }
+        .day.admin-mode { cursor: pointer; }
+        .day.admin-mode:hover { background-color: #edf2ff; border-color: #bac8ff; }
+
+        .summary-box { border: 1px solid var(--border-color); border-radius: 6px; padding: 1.2rem; background: #fafafa; margin-bottom: 1.5rem; }
+        .summary-box h5 { font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0.6rem; color: var(--text-color); }
+        .summary-list { font-size: 0.85rem; list-style: none; }
+        .summary-list li { padding: 0.4rem 0; border-bottom: 1px dashed var(--border-color); color: #333; display: flex; justify-content: space-between; }
+        .summary-list li:last-child { border-bottom: none; }
+        .summary-list .date-label { font-weight: 700; color: var(--text-color); }
+
+        /* RIGHT: SPACES */
+        .space-list { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        .space-item { display: grid; grid-template-columns: 1fr; gap: 1.5rem; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; background-color: #ffffff; position: relative; }
+        @media (min-width: 768px) { .space-item { grid-template-columns: 180px 1fr; } }
+        .space-img { width: 100%; height: 140px; background-color: #f5f5f5; background-size: cover; background-position: center; border-radius: 4px; }
+        .space-info { display: flex; flex-direction: column; justify-content: space-between; }
+        .space-name { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .space-meta { font-size: 0.9rem; color: var(--muted-text); margin-bottom: 1rem; }
+        .space-meta span { color: var(--text-color); font-weight: 600; }
+        .status-tag { color: var(--highlight); font-weight: 600; }
+        .inquire-lnk { font-size: 0.85rem; font-weight: 700; color: var(--text-color); text-decoration: none; text-transform: uppercase; border: 1px solid var(--text-color); padding: 0.5rem 1rem; width: fit-content; border-radius: 4px; }
+        .delete-space-btn { position: absolute; top: 1rem; right: 1rem; color: #fa5252; background: none; border: none; cursor: pointer; font-size: 0.8rem; text-decoration: underline; }
+
+        .admin-panel { background: #f8f9fa; border: 1px dashed var(--admin-color); padding: 1.5rem; border-radius: 6px; margin-bottom: 2rem; }
+        .admin-panel h4 { color: var(--admin-color); margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase; }
+        
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .form-card { background: white; padding: 3rem; border: 1px solid var(--border-color); border-radius: 8px; max-width: 400px; width: 100%; }
+        .form-card h3 { margin-bottom: 1.5rem; font-size: 1.8rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--muted-text); }
+        .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem; }
+        .submit-btn { width: 100%; padding: 0.75rem; background: var(--text-color); color: white; border: none; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 1rem; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay" class="overlay hidden">
+        <div class="form-card">
+            <h3>X8 Portal</h3>
+            <p style="color: var(--muted-text); margin-bottom: 1.5rem; font-size: 0.9rem;">請填寫基本資料以查看您的專屬檔期月曆。</p>
+            <form id="loginForm">
+                <div class="form-group"><label>您的稱呼 (Name)</label><input type="text" id="clientName" required placeholder="例如: Crystal"></div>
+                <div class="form-group"><label>公司名稱 (Company)</label><input type="text" id="clientCompany" required placeholder="例如: 富途證券"></div>
+                <div class="form-group"><label>電話號碼 (Phone)</label><input type="tel" id="clientPhone" required placeholder="例如: 91234567"></div>
+                <button type="submit" class="submit-btn">進入系統</button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem;"><a href="#" onclick="switchMode('admin-login')" style="font-size: 0.8rem; color: var(--muted-text);">管理員登入</a></p>
+        </div>
+    </div>
+
+    <div id="adminLoginOverlay" class="overlay hidden">
+        <div class="form-card">
+            <h3 style="color: var(--admin-color);">X8 Admin</h3>
+            <form id="adminLoginForm">
+                <div class="form-group"><label>管理員密碼</label><input type="password" id="adminPassword" required placeholder="密碼: admin888"></div>
+                <button type="submit" class="submit-btn" style="background: var(--admin-color);">登入後台</button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem;"><a href="#" onclick="switchMode('client-login')" style="font-size: 0.8rem; color: var(--muted-text);">返回客戶端</a></p>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo"><h1 onclick="toggleAdminAccess()">X8 Production</h1></div>
+            <div id="identityTag" class="client-tag">Loading...</div>
+        </header>
+
+        <div class="hero">
+            <div>
+                <h2>Space Booking Portal</h2>
+                <p id="welcomeMsg">查看貴公司的專屬預約日子，或瀏覽最新開放的場地檔期。</p>
+            </div>
+            <button class="logout-btn" onclick="clearSession()">登出 / 切換帳戶</button>
+        </div>
+
+        <div class="grid-layout">
+            <div class="calendar-wrap">
+                <div class="section-title">Your Schedule</div>
+                <div class="calendar-nav">
+                    <button class="nav-btn" onclick="moveMonth(-1)">◀ 上個月</button>
+                    <div class="month-indicator" id="monthYearLabel">July 2026</div>
+                    <button class="nav-btn" onclick="moveMonth(1)">下個月 ▶</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+
+                <div class="summary-box" id="clientSummaryBox">
+                    <h5>📋 您的全部預約清單 (All Confirmed Bookings)</h5>
+                    <ul class="summary-list" id="summaryList"></ul>
+                </div>
+
+                <div id="adminControls" class="admin-panel hidden">
+                    <h4>⚙️ 檔期分配控制</h4>
+                    <div class="form-group">
+                        <label>選擇目前要操作的客戶</label>
+                        <select id="adminClientSelect" onchange="loadCalendar(); updateSummaryList();"></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="spaces-wrap">
+                <div id="adminVenueFormSection" class="admin-panel hidden">
+                    <h4>➕ 直接新增場地與相片 (Maxine 專用)</h4>
+                    <form id="addVenueForm">
+                        <div class="form-group">
+                            <label>場地簡稱 (例如：尖沙咀東翼 / 沙田中庭)</label>
+                            <input type="text" id="newVenueShortName" required placeholder="簡短名稱">
+                        </div>
+                        <div class="form-group">
+                            <label>完整場地名稱與位置</label>
+                            <input type="text" id="newVenueName" required placeholder="完整名字">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>詳細價錢資料</label>
+                                <input type="text" id="newVenueRate" required placeholder="租金">
+                            </div>
+                            <div class="form-group">
+                                <label>開放月份/狀態</label>
+                                <input type="text" id="newVenueStatus" required placeholder="狀態">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>選擇場地相片</label>
+                            <input type="file" id="newVenuePhoto" accept="image/*" required>
+                        </div>
+                        <button type="submit" class="submit-btn" style="background: var(--admin-color);">直接發佈場地</button>
+                    </form>
+                </div>
+
+                <div class="section-title">Available Spaces</div>
+                <div class="space-list" id="spaceList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let viewYear = 2026; let viewMonth = 6;
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        let dataset = {
+            clients: JSON.parse(localStorage.getItem('x8_clients')) || [
+                { company: "富途證券", name: "Crystal", phone: "91234567" },
+                { company: "Tiger Brokers", name: "Alex", phone: "61234567" }
+            ],
+            bookings: JSON.parse(localStorage.getItem('x8_bookings')) || [
+                { company: "富途證券", date: "2026-07-05", venue: "尖沙咀東翼" },
+                { company: "富途證券", date: "2026-07-06", venue: "尖沙咀東翼" },
+                { company: "富途證券", date: "2026-07-07", venue: "尖沙咀東翼" }
+            ],
+            venues: JSON.parse(localStorage.getItem('x8_venues')) || [
+                { id: "v1", shortName: "尖沙咀東翼", name: "尖沙咀大型商場 - G/F 東翼大堂", rate: "HK$ 120,000 / Week", status: "Available", img: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=400&q=80" }
+            ]
+        };
+
+        let currentMode = 'client'; let currentClient = null;
+
+        function saveData() {
+            localStorage.setItem('x8_clients', JSON.stringify(dataset.clients));
+            localStorage.setItem('x8_bookings', JSON.stringify(dataset.bookings));
+            localStorage.setItem('x8_venues', JSON.stringify(dataset.venues));
+        }
+
+        window.onload = function() {
+            const cachedClient = localStorage.getItem('x8_current_client');
+            const cachedMode = localStorage.getItem('x8_mode');
+            if (cachedMode === 'admin') { enterAdminMode(); } 
+            else if (cachedClient) { currentClient = JSON.parse(cachedClient); enterClientMode(currentClient); } 
+            else { switchMode('client-login'); }
+        };
+
+        function switchMode(mode) {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('adminLoginOverlay').classList.add('hidden');
+            if (mode === 'client-login') document.getElementById('loginOverlay').classList.remove('hidden');
+            if (mode === 'admin-login') document.getElementById('adminLoginOverlay').classList.remove('hidden');
+        }
+
+        document.getElementById('loginForm').onsubmit = function(e) {
+            e.preventDefault();
+            const company = document.getElementById('clientCompany').value.trim();
+            currentClient = { company, name: document.getElementById('clientName').value.trim(), phone: document.getElementById('clientPhone').value.trim() };
+            if (!dataset.clients.some(c => c.company === company)) { dataset.clients.push(currentClient); }
+            localStorage.setItem('x8_current_client', JSON.stringify(currentClient));
+            localStorage.setItem('x8_mode', 'client');
+            switchMode('none'); enterClientMode(currentClient); saveData();
+        };
+
+        document.getElementById('adminLoginForm').onsubmit = function(e) {
+            e.preventDefault();
+            if (document.getElementById('adminPassword').value === 'admin888') {
+                localStorage.setItem('x8_mode', 'admin'); switchMode('none'); enterAdminMode();
+            } else { alert('密碼錯誤！'); }
+        };
+
+        function enterClientMode(client) {
+            currentMode = 'client';
+            document.getElementById('adminControls').classList.add('hidden');
+            document.getElementById('adminVenueFormSection').classList.add('hidden');
+            document.getElementById('identityTag').className = "client-tag";
+            document.getElementById('identityTag').innerText = `${client.company} // ${client.name}`;
+            loadCalendar(); renderSpaces(); updateSummaryList();
+        }
+
+        function enterAdminMode() {
+            currentMode = 'admin';
+            document.getElementById('identityTag').className = "client-tag admin-badge";
+            document.getElementById('identityTag').innerText = "X8 Admin (Maxine)";
+            const select = document.getElementById('adminClientSelect');
+            select.innerHTML = dataset.clients.map(c => `<option value="${c.company}">${c.company}</option>`).join('');
+            document.getElementById('adminControls').classList.remove('hidden');
+            document.getElementById('adminVenueFormSection').classList.remove('hidden');
+            loadCalendar(); renderSpaces(); updateSummaryList();
+        }
+
+        function moveMonth(direction) {
+            viewMonth += direction;
+            if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+            if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+            loadCalendar();
+        }
+
+        document.getElementById('addVenueForm').onsubmit = function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('newVenuePhoto'); const file = fileInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const newVenue = {
+                    id: "v_" + Date.now(),
+                    shortName: document.getElementById('newVenueShortName').value.trim(),
+                    name: document.getElementById('newVenueName').value.trim(),
+                    rate: document.getElementById('newVenueRate').value.trim(),
+                    status: document.getElementById('newVenueStatus').value.trim(),
+                    img: event.target.result
+                };
+                dataset.venues.push(newVenue); saveData(); renderSpaces();
+                document.getElementById('addVenueForm').reset(); alert('🎉 場地發佈成功！');
+            };
+            reader.readAsDataURL(file);
+        };
+
+        function deleteVenue(id) {
+            if (confirm('確定要刪除這個場地嗎？')) { dataset.venues = dataset.venues.filter(v => v.id !== id); saveData(); renderSpaces(); }
+        }
+
+        function loadCalendar() {
+            document.getElementById('monthYearLabel').innerText = `${monthNames[viewMonth]} ${viewYear}`;
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = `<div class="weekday">SU</div><div class="weekday">MO</div><div class="weekday">TU</div><div class="weekday">WE</div><div class="weekday">TH</div><div class="weekday">FR</div><div class="weekday">SA</div>`;
+            const firstDayIndex = new Date(viewYear, viewMonth, 1).getDay();
+            const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
+            for (let i = 0; i < firstDayIndex; i++) { grid.innerHTML += `<div class="day empty"></div>`; }
+            let targetCompany = (currentMode === 'client') ? currentClient.company : document.getElementById('adminClientSelect').value;
+
+            for (let day = 1; day <= totalDays; day++) {
+                const currentStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const booking = dataset.bookings.find(b => b.company === targetCompany && b.date === currentStr);
+                const dayEl = document.createElement('div');
+                dayEl.className = `day active-month ${booking ? 'booked' : ''} ${currentMode === 'admin' ? 'admin-mode' : ''}`;
+                dayEl.innerHTML = `<span class="day-num">${day}</span>`;
+                if (booking) { dayEl.innerHTML += `<span class="venue-tag" title="${booking.venue}">${booking.venue}</span>`; }
+
+                if (currentMode === 'admin') {
+                    dayEl.onclick = function() {
+                        if (booking) {
+                            if (confirm(`是否取消 ${targetCompany} 於 ${currentStr} 的預約？`)) {
+                                dataset.bookings = dataset.bookings.filter(b => !(b.company === targetCompany && b.date === currentStr));
+                            }
+                        } else {
+                            if (dataset.venues.length === 0) { alert('請先創建場地！'); return; }
+                            let venueOptions = dataset.venues.map((v, idx) => `${idx + 1}. ${v.shortName}`).join('\n');
+                            let choice = prompt(`請選擇場地編號：\n\n${venueOptions}`);
+                            if (choice && dataset.venues[choice - 1]) {
+                                dataset.bookings.push({ company: targetCompany, date: currentStr, venue: dataset.venues[choice - 1].shortName });
+                            }
+                        }
+                        saveData(); loadCalendar(); updateSummaryList();
+                    };
+                }
+                grid.appendChild(dayEl);
+            }
+        }
+
+        function updateSummaryList() {
+            const listEl = document.getElementById('summaryList');
+            let targetCompany = (currentMode === 'client') ? currentClient.company : document.getElementById('adminClientSelect').value;
+            let myBookings = dataset.bookings.filter(b => b.company === targetCompany).sort((a,b) => a.date.localeCompare(b.date));
+            if (myBookings.length === 0) { listEl.innerHTML = `<li style="color:var(--muted-text); border:none;">目前尚無任何預約檔期。</li>`; return; }
+            let html = "";
+            myBookings.forEach(b => {
+                const parts = b.date.split('-');
+                html += `<li><span class="date-label">📅 ${parts[0]}年 ${parseInt(parts[1])}月 ${parseInt(parts[2])}日</span> <span style="color:var(--highlight); font-weight:700;">確定預約：${b.venue}</span></li>`;
+            });
+            listEl.innerHTML = html;
+        }
+
+        function renderSpaces() {
+            const list = document.getElementById('spaceList'); const compName = currentClient ? currentClient.company : "客戶";
+            list.innerHTML = dataset.venues.map(v => {
+                const waText = encodeURIComponent(`你好Maxine，我是 ${compName} 。我們對「${v.name}」的檔期有興趣。`);
+                const deleteBtn = (currentMode === 'admin') ? `<button class="delete-space-btn" onclick="deleteVenue('${v.id}')">✕ 刪除</button>` : '';
+                return `
+                    <div class="space-item">
+                        ${deleteBtn}
+                        <div class="space-img" style="background-image: url('${v.img}')"></div>
+                        <div class="space-info">
+                            <div>
+                                <h3 class="space-name">${v.name} <span style="font-size:0.8rem; color:var(--muted-text); font-weight:normal;">(${v.shortName})</span></h3>
+                                <div class="space-meta"><span>Rate:</span> ${v.rate} &nbsp;|&nbsp; <span>Status:</span> <span class="status-tag">${v.status}</span></div>
+                            </div>
+                            <a href="https://wa.me/85212345678?text=${waText}" target="_blank" class="inquire-lnk">Inquire via WhatsApp</a>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function clearSession() { localStorage.removeItem('x8_current_client'); localStorage.removeItem('x8_mode'); location.reload(); }
+        function toggleAdminAccess() { if(currentMode === 'client') switchMode('admin-login'); else clearSession(); }
+    </script>
+</body>
+</html>
